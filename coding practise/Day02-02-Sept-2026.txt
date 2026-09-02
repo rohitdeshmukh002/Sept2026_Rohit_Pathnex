@@ -1,0 +1,3 @@
+3o min - english speaking
+30 min - linux command practise like ls, ll, ls -la, mkdir, pwd, rm, rm -rf
+30 min - coding practise 
