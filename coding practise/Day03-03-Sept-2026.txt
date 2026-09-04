@@ -1,0 +1,101 @@
+# Day 03 — Users, SGs, Env Vars
+
+## Ansible - Create user
+
+---
+- name: Create rohit user 
+  hosts:all
+  become:yes
+
+  tasks:
+    - name: Create user rohit-admin
+      user: 
+        name: rohit-admin 
+        shell: /bin/bash
+
+## Kubernates - add Environment Variables
+
+appVersion: v1
+kind: Pod
+metadata:
+  name: pathnex-env-pod
+spec:
+  containers:
+    - name:app
+      image: nginx
+      env:
+        - name: APP_ENV
+          value: "production"
+
+
+##!/bin/bash
+FILE="/tmp/rohit.txt"
+
+if [-f "$FILE" ]; then
+  echo "file exists"
+else  
+  echo "file does not exist:
+fi
+
+# NodeJs Build
+## jenkins pipeline - NodeJS build
+You will learn how to **install dependencies, run tests, and build a NodeJs projects**,
+
+Pipeline {
+    agent any
+    tools {
+      nodejs 'NodeJS-16
+    }
+    stages {
+      stage('Checkout) {
+        stage {
+          git url: 'https://github.com/rohitdeshmukh002/Sept2026_Rohit_Pathnex.git'
+        }
+      }
+      stage('Install Dependencies') {
+        steps {
+          sh 'npm test'
+        }
+      }
+      stage('Run Tests'){
+        stage {
+          sh 'npm test'
+        }
+      }
+      satge('Build'){
+        steps {
+          sh 'npm run build'
+        }
+      }
+    }
+}
+
+## Github CI - NodeJS build
+
+stages:
+	- install
+	- test
+	- build
+
+node-install:
+	stage: install
+	image: node:16
+	script:
+	  - git clone https://github.com/rohitdeshmukh002/Sept2026_Rohit_Pathnex.git
+	  - cd sample-node-app
+	  - npm install
+
+node-test:
+    stage: test 
+    image: node:16
+    script:
+      - cd sample-node-app  
+      - npm test
+
+node-build:
+  stage: build
+  image: node:16
+  script:
+    - cd sample-node-app  
+    - npm run build
+  

@@ -1,0 +1,4 @@
+30 min - practised linux command (chown,chmod,vi,vim,head,tail,ls,cd,pwd,cat,mkdir,touch,cp,mv,rm,grep)
+30 min - english speaking practise
+30 min - coding practise
+
