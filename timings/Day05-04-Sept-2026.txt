@@ -1,0 +1,2 @@
+1 hr - coding practise
+3 hr - lecture topic covered ( SSH public and private key authentication, passwordless login, user management,  disk and partition expansion using growpart, grep options, redirection, cron jobs and cron job file management, inodes, and zombie vs orphan processes)
