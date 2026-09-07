@@ -1,0 +1,3 @@
+30 min - coding practise 
+30 min - English speaking
+3 hrs - today covered topic (on prime server vs cloud server, landing zone and control tower, IAM (policies- resources,action,effect,arn), EC2 instance, vpc(NATgate way and enternet gateway, public and private subnet), S3(standard classes)) 

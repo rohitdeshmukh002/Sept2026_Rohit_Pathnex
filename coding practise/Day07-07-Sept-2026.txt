@@ -1,0 +1,134 @@
+# Day 07 — SPEED TYPING
+
+## 1. Ansible — Install Nginx
+
+---
+- name: Install Nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+
+
+## 2. Terraform — EC2
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "rohit" {
+  ami           = "ami-xxxxxxxxxxxxxxxxx"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "Rohit-Server"
+  }
+}
+
+
+
+## 3. Kubernetes — Deployment with 2 Replicas
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nginx-deployment
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: nginx
+
+  template:
+    metadata:
+      labels:
+        app: nginx
+
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+
+
+
+## 4. Shell — Print Date + Uptime
+
+#!/bin/bash
+
+echo "Current Date:"
+date
+
+echo "System Uptime:"
+uptime
+
+
+
+# Parameterized Builds
+
+## 5. Jenkins Pipeline — Parameterized
+
+pipeline {
+    agent any
+
+    parameters {
+        string(
+            name: 'ENVIRONMENT',
+            defaultValue: 'dev',
+            description: 'Deployment Environment'
+        )
+    }
+
+    environment {
+        INSTITUTE_NAME = "Rohit"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/Rohit/sample-java-app.git'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+            }
+        }
+    }
+}
+
+
+## 6. GitLab CI — Parameterized via Variables
+
+
+stages:
+  - deploy
+
+variables:
+  INSTITUTE_NAME: "Rohit"
+  ENVIRONMENT: "dev"
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+
+  script:
+    - echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"
+
