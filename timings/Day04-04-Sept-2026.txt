@@ -1,0 +1,4 @@
+30 min - coding practise 
+1 hr - command practise
+3 hrs - lecture- topic covered(`sed`, `awk`, and `find`,tar`, `gzip`, and `zip`,`umask`, `ps`, `top`, `kill`, `pgrep`, and `free -h`)
+
