@@ -1,0 +1,3 @@
+30 min - coding practise
+30 min - english speaking
+3 hr - lecture (organization and Folder structure, session manager, route53, cloudtrail,cloudwatch,autoscaling, lambda)
