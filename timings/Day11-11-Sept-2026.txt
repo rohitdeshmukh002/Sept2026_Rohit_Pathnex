@@ -1,0 +1,3 @@
+30 min - coding practise 
+3 hr - lect (Kubernates, archittexture, control plane, worker nodes, etcd, api server, manager control, kubelet, pods, CRI)
+30 min - English Speaking 
