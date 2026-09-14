@@ -1,0 +1,97 @@
+# Day 12 — File Content, RDS Skeleton, Rolling Update, Backup
+
+## Terraform — RDS Skeleton
+
+resource "aws_db_instance" "RohitRDS" {
+  allocated_storage      = 10
+  engine                 = "mysql"
+  instance_class         = "db.t2.micro"
+  name                   = "rohitdb"
+  username               = "admin"
+  password               = "password123"
+  skip_final_snapshot    = true
+}
+
+
+## Kubernetes — Rolling Update Strategy
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rohit-rolling
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: roll
+  template:
+    metadata:
+      labels:
+        app: roll
+    spec:
+      containers:
+        - name: web
+          image: nginx
+
+
+## Shell Script — Backup Directory
+
+#!/bin/bash
+
+SOURCE="/var/log"
+DEST="/backup/rohit-$(date +%F).tar.gz"
+
+tar -czf $DEST $SOURCE
+echo "Backup created at: $DEST"
+
+
+# Multi-branch Pipelines
+
+## Jenkins Pipeline — Multi-branch
+You will learn how to **handle multiple branches in Jenkins pipelines**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Rohit"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+    }
+}
+
+## GitLab CI — Branch Specific Jobs
+You will learn how to **run jobs for specific branches in GitLab CI**.
+
+stages:
+  - build
+
+build-main:
+  stage: build
+  image: maven:3.8.1-jdk-1.8
+  script:
+    - mvn clean compile
+  only:
+    - main
+
+build-dev:
+  stage: build
+  image: maven:3.8.1-jdk-1.8
+  script:
+    - mvn clean compile
+  only:
+    - dev
