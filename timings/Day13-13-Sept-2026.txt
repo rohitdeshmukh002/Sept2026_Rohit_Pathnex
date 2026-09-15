@@ -1,0 +1,3 @@
+30 min - coding practise
+3 hrs - lecture(EKS, EKS creation, extended/standard version, Pod Lifecycle, Scaling in Kubernetes, Kubernetes Nodes & Node Groups, Deployment)
+30 min - english speaking 
