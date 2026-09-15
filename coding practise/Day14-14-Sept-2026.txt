@@ -1,0 +1,38 @@
+# Day 14 
+
+## Jenkins Pipeline — Scheduled Build
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Rohit"
+    }
+    triggers {
+        cron('H 5 * * *') // every day at 5 AM
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/rohitdeshmukh002/employee-management-system.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    }
+}
+
+## GitLab CI — Scheduled Pipeline
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: maven:3.8.1-jdk-17
+  script:
+    - git clone https://https://github.com/rohitdeshmukh002/employee-management-system.git'
+    - cd sample-java-app
+    - mvn clean package
