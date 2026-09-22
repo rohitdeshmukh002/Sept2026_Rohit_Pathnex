@@ -1,0 +1,100 @@
+# Day 21 — SPEED TYPING (LEVEL 2)
+
+⏱ TIME LIMIT: 15 minutes
+
+Rewrite all FOUR from scratch.
+
+---
+
+# 1. Ansible
+
+## Requirements
+- Install nginx
+- Start nginx
+- Enable nginx
+
+```yaml
+- name: Install and start nginx
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start nginx
+      service:
+        name: nginx
+        state: started
+
+    - name: Enable nginx
+      service:
+        name: nginx
+        enabled: true
+
+
+## Terraform Ec2 Create
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "pathnex_ec2" {
+  ami           = "ami-432dhjsk23242"
+  instance_type = "t3.micro"
+
+  tags = {
+    Owner = "Rohit"
+  }
+}
+
+## bash script
+
+#!/bin/bash
+
+echo "Current Date:"
+date
+
+echo "System Uptime:"
+uptime
+
+echo "Disk Usage:"
+df -h
+
+
+## jenkins pipeline
+
+pipeline {
+    agent any
+
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+
+    stages {
+
+        stage('Deploy to Dev') {
+            steps {
+                sh 'echo "Deploying $INSTITUTE_NAME to Dev environment"'
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                input message: 'Approve Staging Deployment?'
+
+                sh 'echo "Deploying $INSTITUTE_NAME to Staging environment"'
+            }
+        }
+
+        stage('Deploy to Prod') {
+            steps {
+                input message: 'Approve Prod Deployment?'
+
+                sh 'echo "Deploying $INSTITUTE_NAME to Prod environment"'
+            }
+        }
+    }
+}
