@@ -1,0 +1,86 @@
+# Day 27 — Copy Directory, EBS Volume, NodePort, Log Cleaner
+
+## Ansible — Copy Directory Recursively
+
+---
+- name: Copy Rohit files
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Copy directory
+      copy:
+        src: /opt/rohit/
+        dest: /backup/rohit/
+        remote_src: yes
+
+
+## Terraform — EBS Volume + Attachment
+
+resource "aws_ebs_volume" "RohitVolume" {
+  availability_zone = "us-east-1a"
+  size              = 15
+
+  tags = {
+    Name = "Rohit-Volume"
+  }
+}
+
+resource "aws_volume_attachment" "RohitAttach" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.RohitVolume.id
+  instance_id = aws_instance.RohitEC2.id
+}
+
+
+## Kubernetes — NodePort Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rohit-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: rohit
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+
+
+## Shell Script — Clean Old Logs
+
+#!/bin/bash
+
+find /var/log -type f -mtime +7 -exec rm -f {} \;
+
+echo "Old logs removed."
+
+
+# Jenkins Scripted Pipeline
+
+## Jenkins Scripted Pipeline — Complex Logic
+
+node {
+    def envName = "dev"
+    env.INSTITUTE_NAME = "Rohit"
+    env.TEAM = "DevOps"
+
+    stage('Checkout') {
+        git url: 'https://github.com/rohitdeshmukh002/Sept2026_Rohit_Pathnex'
+    }
+
+    stage('Build') {
+        if (envName == "dev") {
+            sh 'echo "Building $INSTITUTE_NAME app in dev environment for $TEAM"'
+        } else {
+            sh 'echo "Skipping build for $envName"'
+        }
+    }
+
+    stage('Deploy') {
+        input message: "Approve deployment for $envName?"
+        sh 'echo "Deploying $INSTITUTE_NAME app to $envName for $TEAM team"'
+    }
+}
