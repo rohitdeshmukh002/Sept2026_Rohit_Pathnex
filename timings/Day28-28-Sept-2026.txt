@@ -1,0 +1,85 @@
+# Day 28 — Debug Day
+
+Fix these intentionally broken files:
+
+## Ansible — Fixed
+
+- name: Install nginx
+  hosts: all
+  become: true
+  tasks:
+    - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+
+## Terraform — Fixed
+
+resource "aws_s3_bucket" "BadBucket" {
+  bucket = "rohit-bucket"
+}
+
+
+## Kubernetes — Fixed
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: brokenpod
+spec:
+  containers:
+    - name: app
+      image: nginx
+
+
+# Rollback Strategies
+
+## Jenkins Pipeline — Automatic Rollback
+
+pipeline {
+    agent any
+
+    environment {
+        INSTITUTE_NAME = "Rohit"
+        TEAM = "DevOps"
+        ENV = "prod"
+    }
+
+    stages {
+        stage('Deploy') {
+            steps {
+                script {
+                    try {
+                        sh 'echo "Deploying $INSTITUTE_NAME app in $ENV for $TEAM"'
+                        sh 'exit 1' // simulate failure
+                    } catch (Exception e) {
+                        echo "Deployment failed. Rolling back $INSTITUTE_NAME app in $ENV"
+                        sh 'echo "Rollback completed"'
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+## GitLab CI — Rollback Strategy
+
+stages:
+  - deploy
+
+variables:
+  INSTITUTE_NAME: "Rohit"
+  TEAM: "DevOps"
+  ENV: "dev"
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - echo "Deploying $INSTITUTE_NAME app in $ENV for $TEAM"
+    - exit 1
+  after_script:
+    - echo "Deployment failed. Rolling back $INSTITUTE_NAME app in $ENV"
+    - echo "Rollback completed"
