@@ -1,0 +1,243 @@
+#1. ANSIBLE
+
+
+- name: Create pathnex-admin user
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Create user
+      ansible.builtin.user:
+        name: pathnex-admin
+        shell: /bin/bash
+        create_home: true
+        state: present
+
+    - name: Add SSH key
+      ansible.posix.authorized_key:
+        user: pathnex-admin
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        state: present
+
+
+#2. TERRAFORM
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+    }
+  }
+}
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "pathnex_ec2" {
+  ami           = "YOUR_AMI_ID"
+  instance_type = "t2.micro"
+
+  tags = {
+    Project = "Pathnex-Training"
+  }
+}
+
+
+Deployment:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pathnex-app
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: pathnex-app
+
+  template:
+    metadata:
+      labels:
+        app: pathnex-app
+
+    spec:
+      containers:
+        - name: pathnex-container
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+
+
+Service:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pathnex-service
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: pathnex-app
+
+  ports:
+    - port: 80
+      targetPort: 80
+
+
+#!/bin/bash
+
+echo "1) IP"
+echo "2) Disk"
+echo "3) Memory"
+
+read -p "Enter choice: " choice
+
+case $choice in
+  1)
+    hostname -I
+    ;;
+  2)
+    df -h
+    ;;
+  3)
+    free -h
+    ;;
+  *)
+    echo "Invalid choice"
+    ;;
+esac
+
+#Automate all tasks using a Declarative Jenkins Pipeline.
+
+Stages:
+
+1. Infrastructure
+   - Terraform EC2
+   - Project = "Pathnex-Training"
+
+2. App Deployment
+   - Ansible user creation
+   - SSH setup
+   - Kubernetes deployment
+
+3. Monitoring Checks
+   - IP
+   - Disk
+   - Memory
+
+Environment variables:
+
+INSTITUTE_NAME = "Pathnex"
+TEAM           = "DevOps"
+ENV            = "prod"
+PROJECT        = "Pathnex-Training"
+
+
+Example Jenkinsfile:
+
+pipeline {
+
+    agent any
+
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+        TEAM           = "DevOps"
+        ENV            = "prod"
+        PROJECT        = "Pathnex-Training"
+    }
+
+    stages {
+
+        stage('Infrastructure') {
+            steps {
+                sh '''
+                    terraform init
+                    terraform apply -auto-approve
+                '''
+            }
+        }
+
+        stage('App Deployment') {
+            steps {
+                sh '''
+                    ansible-playbook ansible.yml
+                    kubectl apply -f deployment.yml
+                    kubectl apply -f service.yml
+                '''
+            }
+        }
+
+        stage('Monitoring Checks') {
+            steps {
+                sh '''
+                    echo "IP:"
+                    hostname -I
+
+                    echo "Disk:"
+                    df -h
+
+                    echo "Memory:"
+                    free -h
+                '''
+            }
+        }
+    }
+}
+
+
+# 6. GITLAB CI
+
+Stages:
+
+1. infrastructure
+2. app_deployment
+3. monitoring_checks
+
+Variables:
+
+INSTITUTE_NAME = "Pathnex"
+TEAM           = "DevOps"
+ENV            = "prod"
+PROJECT        = "Pathnex-Training"
+
+
+Example .gitlab-ci.yml:
+
+stages:
+  - infrastructure
+  - app_deployment
+  - monitoring_checks
+
+variables:
+  INSTITUTE_NAME: "Pathnex"
+  TEAM: "DevOps"
+  ENV: "prod"
+  PROJECT: "Pathnex-Training"
+
+infrastructure:
+  stage: infrastructure
+  script:
+    - terraform init
+    - terraform apply -auto-approve
+
+app_deployment:
+  stage: app_deployment
+  script:
+    - ansible-playbook ansible.yml
+    - kubectl apply -f deployment.yml
+    - kubectl apply -f service.yml
+
+monitoring_checks:
+  stage: monitoring_checks
+  script:
+    - echo "IP:"
+    - hostname -I
+    - echo "Disk:"
+    - df -h
+    - echo "Memory:"
+    - free -h
