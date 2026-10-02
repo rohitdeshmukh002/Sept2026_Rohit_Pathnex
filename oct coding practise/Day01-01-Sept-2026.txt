@@ -1,0 +1,53 @@
+# Oct 01
+
+## Ansible task - install nginx on server
+
+```yaml
+- name: install nginx on server
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Ngnix
+      yum :
+        name: nginx
+        state: present
+
+    - name: start nginx
+      yum:
+        name: nginx
+        state: start
+
+    - name: enable nginx
+      yum:
+        name: nginx
+        state: enable
+        
+
+## docker installation and first container
+
+docker version
+docker run ubuntu echo "hello rohit"
+
+#dockerfile
+
+FROM ubuntu: 22.04
+CMD ["echo", "hello rohit"] 
+
+
+# Terraform EC2
+
+provider "aws" {
+    region = "us-east-1"
+}
+
+resource "aws_instance" "ServerEc2" {
+    ami         = "ami-0kshfd65765mncx"
+    instance_type = "t3.micro"
+
+    tags = {
+        Name =  "nqt-server"
+        Environment = "Dev"
+        Owner =  "Tcs"
+    }
+}
