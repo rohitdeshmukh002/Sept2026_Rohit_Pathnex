@@ -1,0 +1,150 @@
+Day 02 — Services & Tags
+
+# Ansible
+
+- name: Install Nginx inside the server and enable
+  hosts: all
+  become: yes
+
+  tasks:
+ - name: Install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+         
+        
+# Terraform
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "ec2"{
+    ami = "ami-shjfhj778838njdnjs"
+    instance_type = "t3.micro"
+    key = "rohit"
+
+    tags = { 
+        name = "server-ec2"
+    }
+}
+
+# Kubernetes - Deployment with 2 Replicas
+appVersion: apps/v1
+kind: Deployment
+metadata:
+    name: Google-deployment
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: google-app
+    template:
+        metadata:
+        labels:
+            app: google-app
+    spec:
+        containers:
+        - name: app
+          images: nginx
+          ports:
+            - containerPort: 80
+    
+
+# docker
+docker pull ubuntu
+docker images
+docker ps -a
+
+# dockerfile
+FROM ubuntu:22.04
+RUN apt update
+CMD ["echo" "Hello container"]
+
+# shell script - disk Usage
+
+#!/bin/bash
+df -h
+
+# Ansible docker install
+
+- name: Install Docker and start service
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+      tags:
+        - install
+
+    - name: Start Docker
+      service:
+        name: docker
+        state: started
+      tags:
+        - start
+
+
+# Terraform — EC2 with Tags 
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "server-ec2" {
+    ami = "ami-ksd32323bjdsjdh3232"
+    aws_instance =  "t3.micro"
+    key = "rohit"
+    
+
+    tags = {
+        name = "server-ec2"
+    }
+}
+
+
+# shell script
+
+sudo apt-get update
+sudo apt-get install docker
+systemctl status docker
+
+
+
+# GitLab CI
+
+stages
+    - build
+    - test
+    - package
+
+maven-build:
+    stage: build
+    image: maven:3.8.1-jbk-17
+    script:
+      - git clone https://github.com/rohitdeshmukh002/cohort.git
+      - cd cohert
+      - mvn clean compile
+
+maven-test:
+    stage: test
+    image: maven: maven:3.8.1-jbk-17
+    script:
+        - cd cohert
+        - mvn test
+
+maven-build:
+    stage: build
+    image: maven: maven:3.8.1-jbk-17
+    script:
+        - cd: cohert
+        - mvn build
