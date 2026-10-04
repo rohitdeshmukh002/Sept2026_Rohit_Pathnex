@@ -1,0 +1,242 @@
+# Day 03 — Users, SGs, Env Vars
+
+## Ansible - create user
+
+---
+- name: Create Rohit user
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: create user rohit-admin
+      user:
+        name: rohit-admin 
+        shell: /bin/bash
+
+
+## Terraform EC2 and Security-group
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "ec2-server" {
+  ami = "ami-2893298bhdjwh223"
+  instance_type = "t3.micro"
+  key_pair= "rohit"
+  vpc-vpc_security_group_ids = ["aws_security_group.Security-group.id"]
+
+  tags = {
+    Name = "Server"
+  }
+}
+
+resource "aws_security_group" "Security-group" {
+  name = "rohitSG"
+  description = "this is private Security group"
+
+  ingress {
+    to_port = 22
+    from_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+## Kubernates - add Environment Variables
+
+appVersionL: v1
+kind: pod
+metadata: 
+  name: rohit-env-pod
+spec:
+  containers:
+    - name: app
+      image: nginx
+      env:
+        - name: APP_ENVS
+          value: "production"
+
+## shell script - check file exists
+#!/bin/bash
+
+FILE="/tmp/pathnex.txt"
+
+if [-f "$file"]; then
+  echo "file exists"
+else 
+  echo "file does not exists"
+fi
+
+## nodejs Build Jenkins CI 
+
+pipeline {
+    agent any 
+    tools {
+      node 'NodeJS 16'
+    }
+
+    stages {
+      stage('Checkout') {
+        steps {
+          git url: 'https://github.com/rohitdeshmukh002/cohort.git'
+        }
+      }
+      stage('install dependencies') {
+        steps {
+          sh 'npm install'
+        }
+      }
+      stage('run tests') {
+        stages {
+          sh 'npm tests'
+        }
+      }
+      stage('build') {
+        stages {
+          sh 'npm run build'
+        }
+      }
+    }
+}
+
+
+## Gitlab -CI for node build
+
+stages:
+  - install
+  - test
+  - build
+
+node-install:
+  stage: install
+  image: node:16
+  script:
+    - git clone https://github.com/rohitdeshmukh002/cohort.git
+    - cd cohort
+    - npm install
+
+node-build:
+  stage: build
+  image: node:16
+  script:
+    - cd cohort
+    - npm run build
+
+node-test:
+  stage: test
+  image: node:16
+  script:
+    - cd sample-node-app
+    - npm test
+
+
+
+*Practise 2:*
+
+## Ansible - Install apache and start service
+
+---
+  name: install apache and start service
+  hosts: any
+  become: yes
+
+  tasks:
+    - name: install apache
+      yum:
+        name: httpd
+        state: present
+    
+    - name: start apache
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+## Terraform EC2 creation with Security-group
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "server-ec2"{
+  ami = "ami-ocsjb23323dsddsf"
+  instance_type = "t2.micro"
+  key_pair = "key_pair"
+  vpc_security_group_ids = ["aws_security_group.private-sg.id"]
+
+  tags = {
+    Name = "rohit"
+  }
+}
+
+resource "aws_security_group" "private-sg" {
+  Name: "private-sg"
+  description : private Security group
+
+  ingress {
+    to_port= 22
+    from_port= 22
+    protocol= "tcp"
+    cidr_blocks = ['0.0.0.0/0']
+  }
+
+  egress {
+    to_port     = 0
+    from_port   = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+## Kubernates -  create a replicaset with 3 replicas
+
+appVersion: app/v1
+kind: replicaset
+metadata:
+  name: rogit-replicaset
+spec:
+  replicas: 3 
+  selector:
+    matchLabels:
+      app: rohit-app  
+    template:
+      metadata:
+      labels:
+        app: rohit-app
+    spec:
+      containers:
+        - name: app 
+          image: nginx
+          ports:
+            - containerPort: 8
+
+## Gitlab ci
+
+stages:
+  - install
+  - build
+  - test
+
+node-install:
+  stage: install
+  image: node:16
+  script:
+    - git clone https://github.com/rohitdeshmukh002/cohert.git
+    - cd cohert
+    - npm install
+
+node-build
+  stage: build
+  image: node:16
+  script:
+    - cd cohert
+    - npm build
+
+node-test:
+  stage: test
+  image: node:16
+  script:
+    - cd cohert
+    - npm test
+    
