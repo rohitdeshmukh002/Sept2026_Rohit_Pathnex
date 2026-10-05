@@ -1,0 +1,157 @@
+# Day 04 — More Packages, Key Pair, Service
+
+## Ansible - install Multiple package
+
+---
+- name: install package for rohit
+  hosts: all    
+  become: yes
+
+  tasks:
+    - name: Install tools
+      yum: 
+        name:
+            - git
+            - wget
+        state: present
+
+
+## Terraform - EC2 with key Pair
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "My-server" {
+    ami             = "ami-dsh32344jjhdjhd"
+    instance_type   = "t3.micro"
+    key_name        =  aws_key_pair.my-key.key_name
+
+    tags = {
+        Name = "Server-Ec2"
+    }
+}
+
+resource "aws_key_pair" "my-key" {
+    key_name    = "serverkey"
+    public_key  = "ssh-rsa AAAA...."
+}
+
+
+## Kubernetes — Create ClusterIP Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pathnex-service
+spec:
+  selector:
+    app: pathnex-app
+  ports:
+    - port: 80
+      targetPort: 80
+
+
+# Parallel Builds
+## Jenkins Pipeline — Parallel Build & Test
+
+pipeline {
+    agent any
+    stages {
+        stage('Parallel Tasks') {
+            parallel {
+                steps('Build') {
+                    steps {
+                        sh 'nvm clean compile'
+                    }
+                }
+                stag('Test') {
+                    steps {
+                        sh 'nvm test'
+                    }
+                }
+            }
+        }
+    }
+}
+## GitLab CI - parallel jobs
+
+stages:
+    - build-test
+
+maven-build:
+    stage: build-test
+    image: maven: 3.8.1-jdk-17
+    script:
+        - git clone https://github.com/rohitdeshmukh002/cohert/git
+        - cd cohert
+        - mvn clean compile
+    parallel: 1
+
+maven-test:
+    stage: build-test
+    image: maven:3.8.1-jdk-17
+    script:
+        - cd cohert
+        - maven test
+    parallel: 1
+
+
+## Ansible - Install apache and start service
+
+---
+ - name: Ansible - install apache and start service
+   hosts: all
+   become: yes
+   tasks:
+    - name: install apache
+      yum:
+        name: httpd
+        state: present
+    - name: start service
+      service:
+        name: httpd
+        state: start
+        enabled: yes
+
+## Terraform EC2 creation
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "my-ec2" {
+    ami = "ami-dsjhjkd21232sddf"
+    instance_type = "t2.micro"
+    tags = {
+        Name = "server-ec2"
+    }
+}
+
+## Kubernetes -  Create a replicaset with 3 replicas
+
+appVersion: app/v1
+kind: replicaset
+metadata:
+    name: server-replicaset
+spec:
+    replicas: 3
+    selector:
+        matchLabels: pathnex-app
+    template:
+        metadata:
+        labels:
+            app: server-app
+        spec:
+            containers:
+                - name: app
+                  image: nginx
+                  ports:
+                    - containerPort: 80
+
+ shell script - user Info
+
+#!/bin/bash
+echo "Current user: ${whoami}"
+echo "current user groups: ${groups}"
+
