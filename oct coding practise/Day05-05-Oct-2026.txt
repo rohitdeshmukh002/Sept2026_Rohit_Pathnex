@@ -1,0 +1,130 @@
+# Day 05 — Handlers, User-Data, Resource Limits
+
+## Ansible — Handler to Restart Nginx
+
+---
+- name: Install and Restart nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: install nginx
+      yum:
+        - name: install nginx
+          state: present
+    
+    - name: update config file
+      src: index.html
+      dest:/usr/share/nginx/html/index.html
+      notify: Restart Nginx
+
+    handlers:
+        - name: Restart nginx
+          service:
+            name: nginx
+            state: restart
+
+## Terraform — EC2 with User Data (c6a.12xlarge)
+
+provider "aws" "server" {
+    region = "ap-souht-1"
+}
+
+resource "aws_instance" "my-ec2-server"{
+    ami =  "ami-jfdj2323jhhjd222"
+    instance_type = "c6a.12xlarge"
+
+    user_data = <<EOF
+    #!/bin/bash
+    yum install -y httpd
+    systemctl start httpd
+    EOF
+
+
+    tags =  {
+        Name = "server-ec2"
+    }
+}
+
+## Kubernetes - resource limits
+
+appVersion: app/v1
+kind: pod
+metadata:
+    name: rohit-limited-pod
+spec:
+    containers:
+        - name: app
+          image: nginx
+          resources:
+            limits:
+                memory:"256mb"
+                cpu: "500m"
+
+## Jenkins Pipeline — Use Environment Variables
+
+pipeline {
+    agent any
+    environment {
+        VARIABLE_NAME = "chrome"
+    }
+    stages {
+        stage('Print') {
+            steps {
+                sh 'echo "Welcome to $INSTITUTE_NAME DevOps Training"'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package -Dinstitute.name=$INSTITUTE_NAME'
+            }
+        }
+    }
+}
+
+## GitLab CI — Use Environment Variables
+
+stage:
+    - build
+
+variables:
+    VARIABLE_NAME: "Rohit"
+
+build:
+    stage: build
+    image: maven:3.8.10-jdk-17
+    script:
+        - git clone 'https://github.com/rohitdeshmukh002/cohert.git'
+        - cd cohert
+        - echo "Hi $VARIABLE_NAME"
+        - mvn clean package - Dvaribale.name=$VARIABLE_NAME
+
+
+# Day 05 — Advanced CI/CD and Infrastructure Provisioning
+
+## 🔹 Jenkinsfile — With Git Integration and Testing
+
+```groovy
+pipeline {
+    agent any
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git 'https://github.com/rohitdeshmukh002/cohert.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Building project from git repository'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running Unit tests'
+            }
+        }
+        stage('Deploy') {
+            echo 'deploying'
+        }
+    }
+}
