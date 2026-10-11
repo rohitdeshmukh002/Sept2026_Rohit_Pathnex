@@ -1,0 +1,252 @@
+# Day 08 — Variables, VPC, Probes, Loops
+
+## Ansible — Install Packages Using Variables
+
+---
+  - name: Install packages for Rohit using variables
+    hosts: yes
+    become: yes
+
+    vars:
+      rohit_packages:
+        - tree
+        - unzip
+        - vim
+
+    tasks:
+      - name: Install required packages
+        yum:
+          name: "{{ rohit_packages }}"
+          state: present
+
+## Terraform - Create vpc + Subnet
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_vpc" "server-vpc" {
+  cidr_block = "10.0.0.0/16"
+
+  tags = {
+    Name = "Rohit-vpc"
+  }
+}
+
+resource "aws_subnet" "Rohit-vpc" {
+  vpc_id                    = "aws_vpc.server-vpc.id"
+  cidr_block                = "10.0.0.0/24"
+  map_public_ip_on_launch   = "true"
+
+  tags = {
+    Name = "Pathnex-Subnet"
+  }
+}
+
+## Kubernetes — Add Liveness & Readiness Probes
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pathnex-probe-pod
+spec:
+  containers:
+    - name: web
+      image: nginx
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 5
+      readinessProbe:
+        httpGet:
+          path: /
+          port: 80
+        initialDelaySeconds: 3
+
+## Shell Script - Loop Through List
+
+#!bin/bash
+
+for item in rohit: do
+  echo "Item: $item"
+done
+
+## Conditional Stages - Jenkins pipeline
+
+pipeline {
+  agent any
+  parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment Environment')
+    }
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+      stage('checkout') {
+        steps {
+            git clone: 'main', url: 'https://github.com/Pathnex/cohert.git'
+        }
+      }
+      state('build') {
+        when {
+            branch 'main'
+        }
+        steps {
+          sh 'nvm clean compile'
+        }
+      }
+      stage('Deploy') {
+        when {
+          expression {params.ENVIRONMENT == 'dev'}
+        }
+        steps {
+          sh 'echo Deploying to $Environment by $INSTITUTE_NAME'
+        }
+      }
+    }
+}
+
+## github CI  
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  image: maven: 3.8.1-jdk-17
+  script:
+    - git clone 'https://github.com/rohitdeshmukh002/cohert.git'
+    - cd cohert
+    - mvn clean compile
+  only:
+    - main
+  
+deploy:
+  state: deploy
+  image: alpine:latest
+  script:
+    - echo "deploying to $CI_ENVIRONMENT_NAME by Rohit"
+  only:
+    variables:
+      - $CI_ENVIRONMENT_NAME =="dev"
+  
+
+##Ansible Install docker and python3
+
+---
+- name: Install Docker and Python3
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Install Python3
+      yum:
+        name: python3
+        state: present
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+
+## Terraform — EC2 with Security Group and EBS Volume
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_security_group" "sg-server" {
+  name        = "allow_ssh_http"
+  description = "allow ssh and http"
+
+  ingress = {
+    from_port   = "22"
+    to_port     = "22"
+    cidr_block  = [0.0.0.0/16]
+    protocol    = "tcp"
+  }
+
+  ingress = {
+    from_port       = "80"
+    to_port         = "80"
+    cidr_blocks     = ["0.0.0.0/0"]
+    protocol        = "tcp"
+  }
+}
+
+resource "aws_instance" "aws-ec2" {
+  ami             = "ami-55454sdsdsdsd45455"
+  instance_type   = "t3.micro"
+  security_groups = [aws_security_group.allow_ssh_http]
+
+  ebs_block_device  ={
+    device_name = "/dev/sdh"
+    volume_size = 30
+  }
+}
+
+🔹 Kubernetes — Service with NodePort
+apiVersion: v1
+kind: Service
+metadata:
+  name: pathnex-service
+spec:
+  type: NodePort
+  selector:
+    app: pathnex-app
+  ports:
+    - protocol: TCP
+      port: 80
+      nodePort: 30007
+
+
+## Jenkinsfile — Docker Build and Push
+
+pipeline {
+  agent any
+  Stages {
+    stage ('build docker images') {
+      steps {
+      script {
+        docker.build('abhi-app')
+      }
+      }
+    }
+    stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://docker.io', 'docker-credentials') {
+                        docker.image('pathnex-app').push('latest')
+                    }
+                }
+            }
+        }
+  }
+}
+
+## GitLab CI
+
+Stages:
+  - Build
+  - Deploy
+  - Push
+
+Build:
+  Stage: Build
+  Script: 
+    - Docker Build -t abhi-app
+
+push:
+  stage: push
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+    - docker push pathnex-app
