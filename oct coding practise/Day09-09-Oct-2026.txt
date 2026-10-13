@@ -1,0 +1,128 @@
+# Day 09 — Templates, Internet Gateway, ConfigMap, CPU Load
+
+## Ansible — Use Jinja2 Template
+---
+- name: Deploy template for web
+  hosts: all
+  become: yes
+    
+  tasks:
+  - name: Copy template file
+    template:
+        src: pathnex.conf.j2
+        dest: etc/web.conf
+
+#3 Terraform - Internet Gateway
+
+resource "aws_instance" "my-instance" {
+    vpc_id = aws_vpc.serverVPC.id
+
+    tags = {
+        Name = "server-IGW"
+    }
+}
+
+## Kubernetes — Create ConfigMap
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pathnex-config
+data:
+  APP_MODE: "production"
+  WELCOME_MSG: "Hello Pathnex"
+
+
+## Shell Script — Check CPU Load
+
+#!/bin/bash
+
+LOAD=$(uptime | awk '{print $10}')
+
+echo "Current CPU Load: $LOAD"
+
+
+## Jenkins pipeline
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "server"
+    }
+    stages {
+        stage('checkout') {
+            git url: 'url:https//github.com/rohitdeshmukh002/cohert.git'
+        }
+    }
+    stage('build') {
+        steps {
+            sh 'mvn clean package'
+        }
+    }
+    stage('Archive') {
+        steps {
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
+    }
+}
+
+## github CI - artifacts
+
+stages:
+    - build
+
+build:
+    stage: build
+    image: maven:3.8.1-jdk-17
+    script:
+        - git clone https://github.com/rohitdeshmukh002/cohert.git
+        - cd cohert
+        - nvm clean package
+
+    artifacts:
+        paths:
+            - target/*.jar
+        explain_in: 1 week
+
+
+## Ansible — Setup Docker Container for Nginx
+
+- name: Setup Docker containers for Nginx
+  hosts: all
+  become: yes
+  tasks:
+    - name: pull nginx image
+      docker_image:
+        name: nginx
+        source: pull
+    - name: run nginx container
+      docker_container:
+        name: nginx-container
+        image: nginx
+        state: started
+        published_ports:
+            "8080:80"
+
+resource "aws_launch_configuration" "autoscaling" {
+    name          ="example-config"
+    image_id      = "ami-0abcd1234abcd1234"
+    instance_type = "t3.micro"
+}
+
+resource "aws_autoscaling_group" "example" {
+    desired_capacity     = 2
+    max_size             = 3
+    min_size             = 1
+    vpc_zone_identifier  = ["subnet-12345678"]
+    launch_configuration = aws_launch_configuration.example.id
+}
+
+##GitLab CI
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl apply -f kubernetes/deployment.yaml
