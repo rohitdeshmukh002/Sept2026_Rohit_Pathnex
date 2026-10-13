@@ -1,0 +1,120 @@
+# Day 07 — SPEED TYPING
+
+Rewrite ALL FOUR from scratch:
+
+1. Ansible: Install nginx
+2. Terraform: EC2 (choose any Pathnex instance)
+3. Kubernetes: Deployment 2 replicas
+4. Shell: Print date + uptime
+
+
+## Ansible
+
+---
+ - name: Install nginx
+   hosts: ALL
+   become: yes
+
+   tasks:
+    - name: Install nginx
+      apt:
+        - name: nginx
+        - state: present
+
+## Terraform
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_instance" "my_instance" {
+  ami           = "ami-xxxxxxxxxxxxxxxxx"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "server"
+  }
+}
+
+
+## shell script
+
+#!/bin/bash
+
+echo "Current date and time:"
+date
+
+echo "System uptime:"
+uptime
+
+Set a timer: **20 minutes**
+
+
+## kubernates
+
+appVersion: apps/v1
+kind: deployment
+metadata:
+    name: nginx-deployment
+spec:
+    replicas: 2
+    selector:
+        matchLabels
+        app: nginx
+    template:
+        metadata:
+        labels:
+            app: nginx
+        spec:
+            containers:
+                - name: nginx
+                  image: nginx:latest
+                  ports:
+                    - containerPort: 80
+
+
+## Jenkins pipeline
+
+pipeline {
+    agent any
+    parameters {
+        string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment Environment')
+    }
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            stage {
+                git url: 'https://github.com/rohitdeshmukh002/cohert.git'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+            }
+        }
+    }
+}
+
+## GitLab CI
+
+stages:
+    - build
+    - deploy
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    ENVIRONMENT: "dev" 
+
+build:
+    stage: build
+    image: alpine:latest
+    script:
+        - npm run build
+
+deploy:
+    stage: deploy
+    image: alpine: latest
+    script:
+        - npm run build
