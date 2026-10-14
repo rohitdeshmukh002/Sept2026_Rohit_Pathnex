@@ -1,0 +1,208 @@
+Day 12
+
+## Ansible 
+---
+- name: Install Nginx and start service
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+
+## Terraform instance creation
+
+resource "key_pair" "my_key" {
+    key_name = "my-key"
+    Public = file("")
+}
+
+resource "aws_instance" "my_server" {
+    ami = "ami-342bkb3n4m324"
+    instance_type = "t3.micro"
+    security_group_id = [ "sg-sdf23232vxdvd" ]
+    vpc_id = "vpc-dsj3232nbssdd"
+    key_name = key_pair.my_key
+
+    tags = {
+        Name = "server"
+    }
+}
+
+## Jenkins
+
+pipeline {
+    agent any
+    stages {
+        stage('Clone') {
+            steps {
+                sh 'git clone https://github.com/rohitdeshmukh002/cohert.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'npm ci'
+                sh 'npm run build'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'npm test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh 'echo "Deploying application..."'
+            }
+        }
+    }
+}
+
+##.gitlab-ci.yml
+
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  image: node:22
+  script:
+    - npm ci
+    - npm run build
+
+test:
+  stage: test
+  image: node:22
+  script:
+    - npm test
+
+deploy:
+  stage: deploy
+  image: node:22
+  script:
+    - echo "Deploying server..."
+
+
+# Day 12 — File Content, RDS Skeleton, Rolling Update, Backup
+
+## Ansible — Ensure File With Content
+
+--- 
+- name: create config file for rohit
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Write content to file
+      copy:
+        dest: /etc/rohit.conf
+        Content:  |
+            Welcome to rohit
+
+
+## Terraform — RDS Skeleton
+
+resource "aws_db_instance" "serverdb" {
+    allocated_storage       = 20
+    engine                  = "sql"
+    instance_class          = "t3.db"
+    name                   = "pathnexdb"
+    username               = "admin"
+    password               = "password123"
+    skip_final_snapshot    = true
+}
+
+## Kubernetes — Rolling Update Strategy
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pathnex-rolling
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: roll
+  template:
+    metadata:
+      labels:
+        app: roll
+    spec:
+      containers:
+        - name: web
+          image: nginx
+
+
+## Shell Script — Backup Directory
+
+#!/bin/bash
+
+SOURCE="/var/log"
+DEST="/backup/pathnex-$(date +%F).tar.gz"
+
+tar -czf $DEST $SOURCE
+echo "Backup created at: $DEST"
+
+
+# Multi-branch Pipelines
+
+## Jenkins Pipeline — Multi-branch
+You will learn how to **handle multiple branches in Jenkins pipelines**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+    }
+}
+
+## GitLab CI — Branch Specific Jobs
+You will learn how to **run jobs for specific branches in GitLab CI**.
+
+stages:
+  - build
+
+build-main:
+  stage: build
+  image: maven:3.8.1-jdk-17
+  script:
+    - mvn clean compile
+  only:
+    - main
+
+build-dev:
+  stage: build
+  image: maven:3.8.1-jdk-17
+  script:
+    - mvn clean compile
+  only:
+    - dev
