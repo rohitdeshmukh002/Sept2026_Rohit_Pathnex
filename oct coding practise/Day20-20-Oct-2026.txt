@@ -1,0 +1,199 @@
+# Day 20 — DEBUG DAY
+
+Fix these intentionally broken files:
+
+## Ansible
+
+- name: Install stuff
+  hosts: all
+  tasks:
+   - name: install
+     yum:
+       name: httpd
+       state: present
+
+
+## Terraform — Broken
+
+resource "aws_instance" "Bad" {
+ ami            = "ami-123"
+ instance_type  = "c6i.8xlarge"
+
+ tags = {
+    name = "server"
+ }
+}
+
+## Kubernetes — Broken
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: broken-app
+spec:
+replicas:3
+selector:
+ matchLabels:
+   app: broken
+template:
+ metadata:
+  labels:
+   app: broken
+ spec:
+  containers:
+   -name: app
+    image: nginx
+
+
+# Secrets & Credentials
+
+## Jenkins Pipeline — Using Credentials
+You will learn how to **use credentials securely in Jenkins**.
+
+pipeline {
+    agent any 
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage ('Checkout') {
+            steps {
+                git url: 'https://github.com/rohitdeshmukh002/cohert.git'
+            }
+        }
+        stage ('user credentials') {
+            steps {
+                withCredentials([string(credentialsId: 'PATHNEX_API_KEY', variable: 'API_KEY')]) {
+                    sh 'echo "using secret $API_KEY for $INSTITUTE_NAME"'
+                }
+            }
+        }
+    }
+}
+
+## GitLab CI — Using CI/CD Variables
+You will learn how to **use GitLab CI variables securely**.
+
+stages:
+    - build
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    API_KEY" "Rohit@123"
+
+build:
+    stage: deploy
+    image: alpine:latest
+    script:
+        - echo "using the secret $API_KEY for $INSTITUTE_NAME"
+
+
+## Ansible — Configure Firewall with iptables
+
+- name: configure Firewall
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: set default policies to drop all traffic
+      command: iptables -P INPUT DROP
+    
+    - name: allow SSH and HTTP traffic
+      command: iptables -A INPUT -p tcp -dport 22 -j ACCEPT
+      command: iptables -A INPUT -p http -dport 80 -j ACCEPT
+
+    - name: save iptables configuration
+      command service iptables save
+
+resource "aws_security_group" "server_Sg" {
+    name: "pathnex-sg"
+    description: "allow http and ssh traffic"
+
+    ingress {
+        to_port     = 22
+        from_port   = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        to_port     = 80
+        from_port   = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+}
+
+## Kubernetes — RBAC Configuration for Access Control
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pathnex-cluster-admin
+subjects:
+  - kind: User
+    name: pathnex-user
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+
+## Jenkinsfile — Secure Credentials Management
+
+pipeline {
+    agent any
+    environment {
+        REGISTRY_PASSWORD = credentials('docker-registry-password')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building Docker image...'
+                docker.build('pathnex-web-app')
+            }
+        }
+        stage('Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://docker.io', 'docker-credentials') {
+                        docker.image('pathnex-web-app').push('latest')
+                    }
+                }
+            }
+        }
+    }
+}
+
+## GitLab CI/CD — Secure Deployment with Secrets Management
+
+stages:
+  - build
+  - push
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker build -t pathnex-web-app .
+
+push:
+  stage: push
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+    - docker push pathnex-web-app
+
+deploy:
+  stage: deploy
+  script:
+    - kubectl apply -f kubernetes/deployment.yaml
+    - kubectl get pods --watch
+
+
+
+## Docker
+# Docker Networking
+
+docker network create pathnex-network
+docker run -dit --name c1 --network pathnex-network ubuntu
+docker run -dit --name c2 --network pathnex-network ubuntu
