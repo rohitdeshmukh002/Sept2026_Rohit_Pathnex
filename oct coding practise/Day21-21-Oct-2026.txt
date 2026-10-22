@@ -1,0 +1,237 @@
+# Day 21 — SPEED TYPING (LEVEL 2)
+
+You must rewrite all FOUR from scratch:
+
+## ansible install nginx and start service
+---
+- name: Install nginx and start service
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: install nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: start service
+      service:
+        name: nginx
+        state: started
+        enabled: yes    
+
+
+## Terraform Create EC2 (choose any Pathnex-approved type)
+
+provider "aws" {
+    provider = "ap-south-1"
+}
+
+resource "aws_instance" "server_ec2" {
+    ami                 = "ami-123hfdsk21212"
+    instance_type       = "t3.micro"
+
+    key_name            = "ec2"
+    subnet_id           = "subnet-sfsddf332234342ssa"
+    vpc_security_group_ids  = ["sg-sfdsf23213fdsfds"]
+
+    tags = {
+        name = "PathnexStudent"
+    }
+
+}
+
+3. Kubernetes:
+   - Deployment with 3 replicas
+   - Image: nginx
+
+
+## Print date, uptime, disk usage
+
+#!/bin/bash
+
+echo "Current date and time:"
+date
+echo "System uptime:"
+uptime
+echo "Disk usage:"
+df -h
+
+⏱ TIME LIMIT: 15 minutes
+
+# Multi-Environment Pipeline
+
+## 🔹 Jenkins Pipeline — Deploy to Multiple Environments
+You will learn how to **define multiple environment deployments in one pipeline**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage ('deploy on dev') {
+            steps {
+                sh 'echo "Deploying $INSTITUTE_NAME to dev environment"'
+            }
+        }
+        stage ('deploy to staging') {
+            steps {
+                input message: "Approve staging deployments"
+                sh 'echo "Deploying $INSTITUTE_NAME to staging environment"'
+            }
+        }
+        stage ('deploy on prod') {
+            steps {
+                input message: "Approve Prod Deployment?"
+                sh 'echo "Deploying $INSTITUTE_NAME to Prod environment"'
+            }
+        }
+    }
+}
+
+## 🔹 GitLab CI — Multi-Environment
+You will learn how to **define multiple environment deployments in GitLab CI**.
+
+stages:
+    - deploy
+
+deploy-dev:
+    stage: deploy
+    image: alpine: latest
+    script:
+        - echo "Deploying $INSTITUTE_NAME to dev environment"
+
+deploy-stage:
+    stage: deploy
+    image: alpine: latest
+    script:
+        - echo 'echo "Deploying $INSTITUTE_NAME on staging environment"'
+    when: manual
+
+
+# Day 21 — Disaster Recovery and Backup Strategies
+
+## Ansible — Backup and Restore Files
+
+- name: backup and restore Files
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: create backup of /ect directory
+      command: tar -czvf /tmp/etc-backup.tar.gz /etc
+
+    - name: copy backup to remote server
+      Copy:
+        src: /tmp/etc-backup.tar.gz
+        dest: /tmp/etc-backup.tar.gz
+    
+    - name: restore backup from remote server
+      command: tar -xzvf /tmp/etc-backup.tar.gz
+
+
+## Terraform — Create S3 Bucket with Cross-Region Replication
+
+resource "aws_s3_bucket" "pathnex_bucket" {
+    bucket      = "pathnex-backup-bucket"
+    region      = "us-east-1"
+
+    versioning = {
+        enabled = true
+    }
+}
+
+resource "aws_s3_bucket" "pathnex_backup_bucket_eu" {
+    bucket      = "pathnex_backup_bucket_eu"
+    region      = "us-east-1"
+
+    versioning = {
+        enabled     = true
+    }
+}
+
+resource "aws_s3_bucket_object" "pathnex_backup_file" {
+    bucket      = aws_s3_bucket.pathnex_bucket.bucket
+    key         = "backup.tar.gz"
+    source      = "pathnex_backup.tar.gz"
+}
+
+🔹 Kubernetes — Disaster Recovery with Persistent Volumes
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pathnex-statefulset
+spec:
+  serviceName: "pathnex"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pathnex
+  template:
+    metadata:
+      labels:
+        app: pathnex
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html
+              name: web-content
+  volumeClaimTemplates:
+  - metadata:
+      name: web-content
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+
+          
+## Jenkinsfile — Backup Strategy for Jenkins Workspace
+
+pipeline {
+    agent any
+    stages {
+        stage ('Backup') {
+            steps {
+                echo 'Backing up jenkins workspace...'
+                sh 'tar -czvf /tmp/jenkins-backup.tar.gz ${WORKSPACE}'
+            }
+        }
+        stage ('Restore') {
+            steps {
+                echo 'Restoring jenkins Workspace...'
+                sh 'tar -xzvf /tmp/jenkins-backup.tar.gz -C ${WORKSPACE}'
+            }
+        }
+    }
+}
+
+🔹 GitLab CI/CD — Backup and Restore Deployment Files
+stages:
+  - backup
+  - restore
+
+backup:
+  stage: backup
+  script:
+    - tar -czvf /tmp/backup.tar.gz kubernetes/deployment.yaml
+
+restore:
+  stage: restore
+  script:
+    - tar -xzvf /tmp/backup.tar.gz -C kubernetes/
+
+
+
+🔹 Docker
+# Docker Compose
+version: '3'
+services:
+  web:
+    image: nginx
+    container_name: pathnex-nginx
+    ports:
+      - "80:80"
