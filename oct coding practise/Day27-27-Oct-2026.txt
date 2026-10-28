@@ -1,0 +1,146 @@
+# Day 27 — Copy Directory, EBS Volume, NodePort, Log Cleaner
+
+## Ansible — Copy Directory Recursively
+
+---
+- name: copy Pathnex  files
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: copy directory
+      copy:
+        src: /opt/pathnex
+        dest: /backup/pathnex
+        remote_src: yes
+
+
+## Terraform — EBS Volume + Attachment
+
+resource "aws_ebs_volume" "PathnexVolume" {
+    availability_zone   = "us-east-1"
+    size                = 20
+
+    tags   = {
+        Name = "Pathnex-Volume"
+    }
+}
+
+resource "aws_volume_attachment" "PathnexAttach" {
+    device_name = "/dev/sdh"
+    volume_id   = aws_ebs_volume.PathnexAttach.id
+    instance_id = aws_instance.PathnexEC2.id
+}
+
+## Kubernetes — NodePort Service
+
+apiVersion: app/v1
+kind: Service
+metadata:
+    name: pathnex-nodePort
+spec:
+    type: nodePort
+    selector:
+        pathnex
+    ports:
+        - port: 80
+          targetPort: 80
+          nodePort: 30800 
+
+## Shell Script — Clean Old Logs
+
+#!/bin/bash
+
+find /var/log -type f -mtime +7 -exec rm -f {} \;
+
+echo "Old logs removed."
+
+
+# Jenkins Scripted Pipeline
+
+## Jenkins Scripted Pipeline — Complex Logic
+You will learn how to **write scripted pipelines with conditional logic**.
+
+node {
+    def.envName = "dev"
+    env.INSTITUTE_NAME = "Pathnex"
+    env.TEAM = "DevOps"
+
+    stage('Checkout') {
+        git url: 'https://github.com/rohitdeshmukh002/argoCD-lab.git'
+    }
+    stage('Build') {
+        if (envName == "dev") {
+            sh 'echo "building $INSTITUTE_NAME app in dev environment for $TEAM"'
+        } else {
+            sh 'echo "Skipping build for $envName"'
+        }
+    }
+    stage('Deploy') {
+        input message: "Approve deployment for $envName?"
+        sh 'echo "Deploying $INSTITUTE_NAME app to $envName for $TEAM team"'
+    }
+}
+
+## Ansible — Deploy Serverless Lambda Functions
+- name: Deploy Serverless Lambda Function
+  hosts: localhost
+  tasks:
+    - name: Create Lambda function
+      command: aws lambda create-function --function-name pathnex-lambda --runtime nodejs14.x --role arn:aws:iam::123456789012:role/lambda-role --handler index.handler --zip-file fileb://lambda.zip
+
+## Terraform — Create DynamoDB Table for Serverless Application
+resource "aws_dynamodb_table" "pathnex_table" {
+  name           = "pathnex-table"
+  hash_key       = "id"
+  billing_mode   = "PAY_PER_REQUEST"
+  attribute {
+    name = "id"
+    type = "S"
+  }
+}
+
+## Kubernetes — Deploy Serverless Using Kubeless
+
+apiVersion: Kubeless.io/v1beta1
+kind: Function
+metadata:
+    name: Pathnex-lambda
+    namespace: pathnex
+spec:
+    name: pathnex-lambda
+    handler: index.handler
+    function: |
+        module.exports = function(event, content) {
+            context.succeed('Hello World')
+        }
+
+## Jenkinsfile — Lambda Function Deployment Pipeline
+
+pipeline {
+    agent any
+    stages {
+        stage ('Build') {
+            steps {
+                echo 'Building lambda function package'
+                sh 'zip -r lambda.zip lambda/'
+            }
+        }
+        stage('deploy') {
+            steps {
+                script {
+                    sh 'aws lambda update-function-code --function-name Pathnex-lambda --zip-file fileb://lambda.zip'
+                }
+            }
+        }
+    }
+}
+
+## Docker
+# Docker Exec & Resource Limits
+
+docker exec -it Pathnex-nginx bash
+docker stats 
+
+# Bash
+docker run -d --memory="512m" --cpus="1.0" nginx
