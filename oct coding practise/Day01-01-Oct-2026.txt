@@ -51,3 +51,87 @@ resource "aws_instance" "ServerEc2" {
         Owner =  "Tcs"
     }
 }
+
+# Day 01 — Basics
+
+## 🔹 Ansible Task — Install Nginx on Pathnex Server
+
+---
+- name: install nginx on pathnex server
+  hosts: all
+  become: yes
+
+  tasks:
+    - name : install nginx 
+      yum: 
+        name: nginx
+        state: present
+
+## 🔹 Terraform Task — Create EC2 (c5.xlarge)
+
+provider "aws"  {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "PathnexEC2" {
+  ami         = "ami-3dfsfs4dffdsf333"
+  instance_type = "c5.xlarge"
+  
+  tags = {
+    name = "Pathnex-EC2"
+  }
+}
+
+
+## 🔹 Kubernetes Task — Create Nginx Pod
+
+apiVersion: v1
+kind: pod
+metadata:
+  name: pathnex-pod
+spec:
+  containers:
+    - name: web
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+
+## 🔹 Shell Script — Print Date & Hostname
+
+#!/bin/bash
+
+echo "Date: $(date)"
+echo "Hostname: $(hostname)"
+
+# Git Integration
+## 🔹 Jenkins Pipeline — Checkout Git
+You will learn how to **checkout a Git repository** and list files.
+
+pipeline {
+  agent any
+  stage {
+      stage ('Checkout') {
+        steps {
+          git branch: 'main' url: 'https://github.com/Pathnex/sample-java-git'
+        }
+      }
+      stage ('list files') {
+        steps {
+          sh 'ls -la'
+        }
+      }
+  }
+}
+
+## 🔹 GitLab CI — Checkout Git
+You will learn how to **checkout a Git repository in GitLab CI**.
+
+stages:
+  - checkout
+
+git-checkout:
+  stage: checkout
+  script:
+    - git clone https://github.com/Pathnex/sample-java-app.git
+    - cd sample-java-app
+    - ls -la
