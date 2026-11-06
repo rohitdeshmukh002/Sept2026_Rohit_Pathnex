@@ -1,6 +1,6 @@
 # Day 04 — More Packages, Key Pair, Service
 
-## 🔹 Ansible — Install Multiple Packages
+## Ansible — Install Multiple Packages
 
 ---
 - name: install package for pathnex
@@ -15,7 +15,7 @@
             - wget
         state: present
 
-## 🔹 Terraform — EC2 with Key Pair (c6i.8xlarge)
+## Terraform — EC2 with Key Pair (c6i.8xlarge)
 
 provider "aws" {
     region = "ap-south-1"
@@ -40,7 +40,7 @@ resource "aws_instance" "PathnexEC2" {
     }
 }
 
-## 🔹 Kubernetes — Create ClusterIP Service
+## Kubernetes — Create ClusterIP Service
 
 apiVersion: v1
 kind: service
@@ -54,7 +54,7 @@ spec:
       targetPort: 80
 
 # Parallel Builds
-## 🔹 Jenkins Pipeline — Parallel Build & Test
+## Jenkins Pipeline — Parallel Build & Test
 You will learn how to **run build and test in parallel**.
 
 pipeline {
@@ -77,7 +77,7 @@ pipeline {
     }
 }
 
-## 🔹 GitLab CI — Parallel Jobs
+## GitLab CI — Parallel Jobs
 You will learn how to **run parallel jobs in GitLab CI**.
 
 stages:
@@ -98,3 +98,108 @@ maven-test:
     script:
         - cd sample-java-app
         - mvn test
+
+## Jenkinsfile — Basic CI Pipeline
+
+pipeline {
+    agent any 
+    stages {
+        stage ('build') {
+            steps {
+                echo 'Building project'
+            }
+        }
+        stage ('test') {
+            steps {
+                echo 'Running tests'
+            }
+        }
+        stage ('Deploy') {
+            steps {
+                echo 'Deploying application'
+            }
+        } 
+    }
+}
+
+## GitLab CI/CD — Basic Pipeline
+
+stages:
+    - build
+    - test
+    - deploy
+
+build:
+    stage: build
+    script:
+        - echo "Building project"
+
+test:
+    stage: test
+    script:
+        echo "Running test"
+
+deploy:
+    stage: deploy
+    script:
+        - echo "Deploying application"
+
+## Ansible — Install and Configure Nginx
+
+- name: install and configure nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: install nginx
+      yum:
+        name: nginx
+        state: present
+    - name: configure nginx
+      template:
+        scr: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+    - name: start nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+## Terraform — EC2 with Security Group
+
+resource "aws_security_group" "my_Sg" {
+    name        = "server_sg"
+    description = "allow ssh and https"
+
+    ingress {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress  {
+        from_port   = 0
+        to_port     = 0
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
+
+
+## Docker
+# Apache Container
+FROM ubuntu:22.04
+RUN apt update && apt install apache2 -y
+RUN echo "Hello Pathnex" > /var/www/html/index.html
+CMD ["apachectl", "-D", "FOREGROUND"]
+
+# Bash Real Path
+/var/www/html
