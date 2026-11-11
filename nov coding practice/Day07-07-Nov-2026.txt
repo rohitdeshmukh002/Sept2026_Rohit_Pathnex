@@ -1,0 +1,119 @@
+# Day 07 — SPEED TYPING
+
+Rewrite ALL FOUR from scratch:
+
+1. Ansible: Install nginx
+
+---
+- name: Install and configure Nginx
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable nginx
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes
+ 
+2. Terraform: EC2 (choose any Pathnex instance)
+
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "ServerEC2" {
+    ami             = "ami-65uyihhgjjjg323"
+    instance_type   = "t3.micro"
+
+    tags = {
+        Name = "PathnexEC2"
+    }
+}
+
+3. Kubernetes: Deployment 2 replicas
+
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: pathnex
+  namespace: default
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: pathnex
+
+  template:
+    metadata:
+      labels:
+        app: pathnex
+
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+
+4. Shell: Print date + uptime
+
+#!/bin/bash
+
+date=$(date)
+uptime=$(uptime)
+
+echo "Current Date and Time: ${date}"
+echo "System Uptime: ${uptime}"
+
+
+Set a timer: **20 minutes**
+
+
+# Parameterized Builds
+
+## 🔹 Jenkins Pipeline — Parameterized
+You will learn how to **create parameterized builds in Jenkins**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage ('checkout') {
+            steps {
+                git url: 'https://github.com/pathnex/sample-java-app.git'
+            }
+        }
+        stage ('Deploy') {
+            steps {
+                sh 'echo "Deploying to $ENVIRONMENT by $INSTITUTE_NAME"'
+            }
+        }
+    }
+}
+
+## 🔹 GitLab CI — Parameterized via Variables
+You will learn how to **use variables to parameterize GitLab jobs**.
+
+stages:
+    - deploy
+
+variables:
+    INSTITUTE_NAME: "Pathnex"
+    ENVIRONMENT: "dev"
+
+deploy:
+    stage: deploy
+    image: alpine:latest
+    script:
+        - echo "deploying to $ENVIRONMENT by $INSTITUTE_NAME"
