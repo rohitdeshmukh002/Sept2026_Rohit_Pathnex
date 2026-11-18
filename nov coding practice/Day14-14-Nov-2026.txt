@@ -1,0 +1,126 @@
+# Day 14 — MINI PROJECT
+
+Complete these steps:
+
+## 2️⃣ Ansible — Install Nginx & Deploy HTML File
+
+---
+- name: install nginx and deploy html file
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: install nginx
+      yum:
+        name: nginx
+        state: started
+    
+    - name: deploy html file
+      service:
+        name: nginx
+        state: started
+        state: enabled
+    
+    - name: deploy file
+      copy:
+        src: index.html
+        dest: /usr/share/nginx/html/index.html
+        owner: root
+        group: root
+        mode: '0644'
+      
+
+
+## 3️⃣ Kubernetes — Create Deployment + Service
+
+apiVersion: app/v1
+kind: deployment
+metadata:
+    name: ngin-deployment
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: nginx-app
+    template:
+        metadata:
+        labels:
+            app: nginx-app
+
+    spec:
+        containers:
+            - name: nginx
+              image: nginx:latest
+              ports:
+                - containerPort: 80
+
+---
+apiVersion: v1
+kind: service
+metadata:
+    name: nginx-service
+spec:
+    type: nodeport
+    selector:
+        app: nginx-app
+    ports:
+        - protocol: tcp
+          port: 80
+          targetport: 80
+          nodeport: 30080
+
+## 4️⃣ Shell — Print CPU, Memory, Disk
+
+#!/bin/bash
+
+date=$(date)
+Memory=$(free -h)
+top=$(top -b -n 1)
+
+echo "Date = $date"
+echo "Memory Usage:"
+echo "$Memory"
+
+echo "Top Processes:"
+echo "$top"
+
+# Scheduled Pipelines
+
+## 🔹 Jenkins Pipeline — Scheduled Build
+You will learn how to **schedule a Jenkins pipeline using cron**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "pathnex"
+    }
+    triggers {
+        cron('H 2 * * *') 
+    }
+    stages {
+        stage ('checkout') {
+            steps {
+                git url: 'https 'https://github.com/Pathnex/sample-java.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+    }
+}
+
+## 🔹 GitLab CI — Scheduled Pipeline
+You will learn how to **schedule GitLab CI pipelines via cron**.
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: maven:3.8.1-jdk-17
+  script:
+    - git clone https://github.com/Pathnex/sample-java-app.git
+    - cd sample-java-app
+    - mvn clean package
