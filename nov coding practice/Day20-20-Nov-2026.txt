@@ -1,0 +1,91 @@
+# Day 20 — DEBUG DAY
+
+Fix these intentionally broken files:
+
+## 🔹 Ansible
+
+- name: Install stuff
+  hosts: all
+  become: yes
+
+  tasks:
+   - name: install
+     yum:
+       name: httpd
+       state: present
+
+
+## 🔹 Terraform 
+
+resource "aws_instance" "Bad" {
+ ami            = "ami-123"
+ instance_type  = "c6i.8xlarge"
+
+ tags = {
+    name = "Broken-image"
+ }
+}
+
+
+## 🔹 Kubernetes
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: broken-app
+spec:
+    replicas:3
+    selector:
+        matchLabels:
+        app: broken
+    template:
+      metadata:
+        labels:
+           app: broken
+      spec:
+        containers:
+            - name: app
+              image: nginx
+
+
+# Secrets & Credentials
+
+## 🔹 Jenkins Pipeline — Using Credentials
+You will learn how to **use credentials securely in Jenkins**.
+
+pipeline {
+    agent any
+    environment {
+        INSTITUTE_NAME = "Pathnex"
+    }
+    stages {
+        stage ('checkout') {
+            steps {
+                git url: 'https://github.com/pathnex/sample-java-app.git'
+            }
+        }
+        stage ('Use secret') {
+            steps {
+                withCredentials([string(credentialsId: 'PATHNEX_API_KEY', variable: 'API_KEY')]) {
+                    sh 'echo "Using secret $API_KEY for $INSTITUTE_NAME"'
+               }
+            }
+        }
+    }
+}
+
+## 🔹 GitLab CI — Using CI/CD Variables
+You will learn how to **use GitLab CI variables securely**.
+
+stages:
+    - build
+
+variables:
+    INSTITUTE_NAME: "pathnex"
+    API_KEY: "PLACEHOLDER_SECRET"
+
+build:
+    stage: build
+    image: alpine:latest
+    script:
+        - echo "Using secret $API_KEY for $INSTITUTE_NAME"
