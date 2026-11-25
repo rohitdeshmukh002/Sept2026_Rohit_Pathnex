@@ -184,3 +184,49 @@ deploy-prod:
   script:
     - echo "Deploying $INSTITUTE_NAME to Prod environment"
   when: manual
+
+  You must rewrite all FOUR from scratch:
+  
+---
+- name: install nginx and start service
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: install nginx
+      yum:
+        - name: nginx
+          state: present
+    - name: start service
+      service:
+        - name: nginx
+          state: started
+    
+resource "aws_instance" "pathnex" {
+    ami             = "ami-3213424354dfsssafd"
+    instance_type   = "t3.micro"
+
+    tags = {
+        name = "PathnexStudent"
+    }
+}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx
+          ports:
+            - containerPort: 80
